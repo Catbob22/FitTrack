@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FitTrack</title>
+
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- Header -->
+        <header class="page-header">
+            <div class="brand-mark">FT</div>
+
+            <div>
+                <h1>FitTrack</h1>
+                <p>Track your training and see your progress.</p>
+            </div>
+
+            <div class="auth-controls">
+                <span id="email" class="hidden"></span>
+
+                <button
+                    type="button"
+                    id="signIn"
+                >
+                    Sign In
+                </button>
+
+                <button
+                    type="button"
+                    id="signOut"
+                    class="hidden"
+                >
+                    Log out
+                </button>
+            </div>
+        </header>
+
+
+        <div id="signedOutMessage" class="signed-out-message">
+            <h2>Welcome to FitTrack</h2>
+            <p>Sign in to track your training and view your progress.</p>
+        </div>
+
+
+        <div id="appContent" class="hidden">
+
+        <!-- Main page tabs -->
+        <nav class="page-tabs" aria-label="FitTrack sections">
+            <button
+                type="button"
+                id="weeklySummaryTabButton"
+                class="page-tab active"
+            >
+                Weekly Summary
+            </button>
+
+            <button
+                type="button"
+                id="historyTabButton"
+                class="page-tab"
+            >
+                Workout History
+            </button>
+        </nav>
+
+
+        <!-- Weekly Summary view -->
+        <div id="weeklySummaryView" class="page-view">
+
+            <section class="weekly-summary-section">
+
+                <div class="weekly-page-header">
+                    <div>
+                        <span class="section-eyebrow">
+                            Training overview
+                        </span>
+
+                        <h2 id="weeklySummaryTitle">
+                            This Week
+                        </h2>
+
+                        <p id="weeklyDateRange">
+                            Loading your weekly summary...
+                        </p>
+                    </div>
+
+                    <div class="weekly-page-actions">
+                        <button
+                            type="button"
+                            id="weeklyGoalButton"
+                            class="secondary-action-button"
+                        >
+                            Set Weekly Goal
+                        </button>
+
+                        <button
+                            type="button"
+                            id="exerciseProgressButton"
+                            class="secondary-action-button"
+                        >
+                            View Exercise Progress
+                        </button>
+                    </div>
+                </div>
+
+
+                <div class="week-navigation">
+
+                    <button
+                        type="button"
+                        id="previousWeekButton"
+                        class="week-nav-button"
+                    >
+                        ← Previous
+                    </button>
+
+                    <div class="week-navigation-center">
+                        <strong id="weekNavigationDate">
+                            Current week
+                        </strong>
+
+                        <button
+                            type="button"
+                            id="currentWeekButton"
+                            class="current-week-button"
+                        >
+                            Go to Current Week
+                        </button>
+                    </div>
+
+                    <button
+                        type="button"
+                        id="nextWeekButton"
+                        class="week-nav-button"
+                    >
+                        Next →
+                    </button>
+
+                </div>
+
+
+                <div id="weeklySummaryContent">
+                    <div class="loading-state">
+                        Loading weekly summary...
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- Workout History view -->
+        <div id="historyView" class="page-view hidden">
+
+            <section class="history-section">
+
+                <div class="section-heading">
+                    <h2>Workout History</h2>
+                    <p>
+                        Browse, search, edit, or remove workouts
+                        from any week.
+                    </p>
+                </div>
+
+                <div class="filters">
+                    <input
+                        type="text"
+                        id="searchExercise"
+                        placeholder="Search exercise..."
+                    >
+
+                    <select id="typeFilter">
+                        <option value="All">All Types</option>
+                        <option value="Push">Push</option>
+                        <option value="Pull">Pull</option>
+                        <option value="Legs">Legs</option>
+                        <option value="Cardio">Cardio</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <p
+                    id="historyResultCount"
+                    class="history-result-count"
+                >
+                    Loading workouts...
+                </p>
+
+                <div id="workoutList">
+                    <div class="loading-state">
+                        Loading workouts...
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Floating log workout button -->
+    <button
+        type="button"
+        id="openWorkoutButton"
+        class="floating-log-button hidden"
+        aria-label="Log a workout"
+    >
+        <span class="floating-log-icon">+</span>
+        <span class="floating-log-label">Log Workout</span>
+    </button>
+
+
+    <!-- Log Workout popup -->
+    <div id="workoutModal" class="modal">
+
+        <div class="modal-content workout-modal-content">
+
+            <div class="modal-header">
+                <div>
+                    <h2>Log Workout</h2>
+                    <p>Add a new strength or cardio entry.</p>
+                </div>
+
+                <button
+                    type="button"
+                    id="closeWorkoutButton"
+                    class="close-btn"
+                    aria-label="Close workout form"
+                >
+                    ×
+                </button>
+            </div>
+
+            <form id="workoutForm">
+
+                <label for="date">Date</label>
+                <input type="date" id="date" required>
+
+                <label for="workoutType">Workout Type</label>
+                <select id="workoutType">
+                    <option value="Push">Push</option>
+                    <option value="Pull">Pull</option>
+                    <option value="Legs">Legs</option>
+                    <option value="Cardio">Cardio</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <label for="exercise">Exercise</label>
+                <input
+                    type="text"
+                    id="exercise"
+                    placeholder="Example: Bench Press"
+                    required
+                >
+
+                <div id="strengthFields">
+                    <label for="sets">Sets</label>
+                    <input
+                        type="number"
+                        id="sets"
+                        min="1"
+                        placeholder="3"
+                        required
+                    >
+
+                    <label for="reps">Reps</label>
+                    <input
+                        type="number"
+                        id="reps"
+                        min="1"
+                        placeholder="8"
+                        required
+                    >
+
+                    <label for="weight">Weight (kg)</label>
+                    <input
+                        type="number"
+                        id="weight"
+                        min="0"
+                        step="0.5"
+                        placeholder="70"
+                        required
+                    >
+                </div>
+
+                <div id="cardioFields" class="hidden">
+                    <label for="duration">Duration (minutes)</label>
+                    <input
+                        type="number"
+                        id="duration"
+                        min="1"
+                        placeholder="30"
+                    >
+
+                    <label for="distance">Distance (km)</label>
+                    <input
+                        type="number"
+                        id="distance"
+                        min="0"
+                        step="0.1"
+                        placeholder="5"
+                    >
+                </div>
+
+                <label for="notes">Notes</label>
+                <textarea
+                    id="notes"
+                    placeholder="Optional notes..."
+                ></textarea>
+
+                <button
+                    type="submit"
+                    id="submitButton"
+                    class="primary-button"
+                >
+                    Log Workout
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- Workout logged summary -->
+    <div id="loggedWorkoutModal" class="modal">
+
+        <div class="modal-content logged-modal-content">
+
+            <div class="modal-header">
+                <div>
+                    <h2 id="loggedWorkoutTitle">Workout Logged</h2>
+                    <p>Nice work. Here is a quick summary.</p>
+                </div>
+
+                <button
+                    type="button"
+                    id="closeLoggedWorkoutButton"
+                    class="close-btn"
+                    aria-label="Close workout summary"
+                >
+                    ×
+                </button>
+            </div>
+
+            <div id="loggedWorkoutContent"></div>
+
+            <div class="modal-actions">
+                <button
+                    type="button"
+                    id="doneLoggedWorkoutButton"
+                >
+                    Done
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Edit popup -->
+    <div id="editModal" class="modal">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <div>
+                    <h2>Edit Exercise</h2>
+                    <p>Update the details for this workout.</p>
+                </div>
+
+                <button
+                    type="button"
+                    id="closeModalButton"
+                    class="close-btn"
+                    aria-label="Close edit window"
+                >
+                    ×
+                </button>
+            </div>
+
+            <form id="editForm">
+
+                <label for="editDate">Date</label>
+                <input type="date" id="editDate" required>
+
+                <label for="editWorkoutType">Workout Type</label>
+                <select id="editWorkoutType">
+                    <option value="Push">Push</option>
+                    <option value="Pull">Pull</option>
+                    <option value="Legs">Legs</option>
+                    <option value="Cardio">Cardio</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <label for="editExercise">Exercise</label>
+                <input type="text" id="editExercise" required>
+
+                <div id="editStrengthFields">
+                    <label for="editSets">Sets</label>
+                    <input type="number" id="editSets" min="1">
+
+                    <label for="editReps">Reps</label>
+                    <input type="number" id="editReps" min="1">
+
+                    <label for="editWeight">Weight (kg)</label>
+                    <input
+                        type="number"
+                        id="editWeight"
+                        min="0"
+                        step="0.5"
+                    >
+                </div>
+
+                <div id="editCardioFields" class="hidden">
+                    <label for="editDuration">Duration (minutes)</label>
+                    <input type="number" id="editDuration" min="1">
+
+                    <label for="editDistance">Distance (km)</label>
+                    <input
+                        type="number"
+                        id="editDistance"
+                        min="0"
+                        step="0.1"
+                    >
+                </div>
+
+                <label for="editNotes">Notes</label>
+                <textarea id="editNotes"></textarea>
+
+                <div class="modal-actions">
+                    <button
+                        type="button"
+                        id="cancelEditButton"
+                        class="cancel-btn"
+                    >
+                        Cancel
+                    </button>
+
+                    <button type="submit" id="updateButton">
+                        Update Exercise
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- Delete confirmation popup -->
+    <div id="deleteModal" class="modal">
+
+        <div class="modal-content delete-modal-content">
+
+            <div class="modal-header">
+                <div>
+                    <h2>Delete Workout?</h2>
+                    <p>This entry will be permanently removed.</p>
+                </div>
+
+                <button
+                    type="button"
+                    id="closeDeleteButton"
+                    class="close-btn"
+                    aria-label="Close delete confirmation"
+                >
+                    ×
+                </button>
+            </div>
+
+            <div class="delete-confirmation-box">
+                <strong id="deleteWorkoutName">Selected workout</strong>
+            </div>
+
+            <div class="modal-actions">
+                <button
+                    type="button"
+                    id="cancelDeleteButton"
+                    class="cancel-btn"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    id="confirmDeleteButton"
+                    class="confirm-delete-btn"
+                >
+                    Delete Workout
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Weekly goal popup -->
+    <div id="weeklyGoalModal" class="modal">
+
+        <div class="modal-content goal-modal-content">
+
+            <div class="modal-header">
+                <div>
+                    <h2>Weekly Workout Goal</h2>
+                    <p>Choose how many workout sessions you want each week.</p>
+                </div>
+
+                <button
+                    type="button"
+                    id="closeWeeklyGoalButton"
+                    class="close-btn"
+                    aria-label="Close weekly goal settings"
+                >
+                    ×
+                </button>
+            </div>
+
+            <form id="weeklyGoalForm">
+                <label for="weeklyGoalInput">
+                    Sessions per week
+                </label>
+
+                <input
+                    type="number"
+                    id="weeklyGoalInput"
+                    min="1"
+                    max="14"
+                    step="1"
+                    required
+                >
+
+                <div class="modal-actions">
+                    <button
+                        type="button"
+                        id="cancelWeeklyGoalButton"
+                        class="cancel-btn"
+                    >
+                        Cancel
+                    </button>
+
+                    <button type="submit" id="saveWeeklyGoalButton">
+                        Save Goal
+                    </button>
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- Exercise progress popup -->
+    <div id="exerciseProgressModal" class="modal">
+
+        <div class="modal-content report-modal-content">
+
+            <div class="modal-header">
+                <div>
+                    <h2>Exercise Progress</h2>
+                    <p>Review your history and personal bests.</p>
+                </div>
+
+                <button
+                    type="button"
+                    id="closeExerciseProgressButton"
+                    class="close-btn"
+                    aria-label="Close exercise progress"
+                >
+                    ×
+                </button>
+            </div>
+
+            <label for="exerciseProgressSelect">Exercise</label>
+            <select id="exerciseProgressSelect"></select>
+
+            <div id="exerciseProgressContent"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Fun weekly weight comparison popup -->
+    <div id="funEquivalentModal" class="modal">
+
+        <div class="modal-content fun-modal-content">
+
+            <div class="modal-header">
+                <div>
+                    <h2>Weekly Fun Equivalent</h2>
+                    <p>A fun way to picture the selected week's strength volume.</p>
+                </div>
+
+                <button
+                    type="button"
+                    id="closeFunEquivalentButton"
+                    class="close-btn"
+                    aria-label="Close fun comparison"
+                >
+                    ×
+                </button>
+            </div>
+
+            <div id="funEquivalentContent"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Workout split sessions popup -->
+    <div id="sessionModal" class="modal">
+
+        <div class="modal-content session-modal-content">
+
+            <div class="modal-header">
+                <div>
+                    <h2 id="sessionTitle">Workout Sessions</h2>
+                    <p>
+                        Review each session and the exercises inside it.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    id="closeSessionButton"
+                    class="close-btn"
+                    aria-label="Close workout sessions"
+                >
+                    ×
+                </button>
+            </div>
+
+            <div id="sessionContent"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Workout split fun comparison popup -->
+    <div id="splitFunModal" class="modal">
+
+        <div class="modal-content fun-modal-content">
+
+            <div class="modal-header">
+                <div>
+                    <h2 id="splitFunTitle">Workout Split Fun Equivalent</h2>
+                    <p>A fun way to picture one workout split for the selected week.</p>
+                </div>
+
+                <button
+                    type="button"
+                    id="closeSplitFunButton"
+                    class="close-btn"
+                    aria-label="Close workout split fun comparison"
+                >
+                    ×
+                </button>
+            </div>
+
+            <div id="splitFunContent"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Small notification AT THE TOP RIGHT -->
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+
+    <script type="module">
+        import {
+            userManager,
+            signOutRedirect
+        } from "./main.js";
+
+        window.userManager = userManager;
+
+        document.getElementById("signIn").addEventListener(
+            "click",
+            async () => {
+                await userManager.signinRedirect();
+            }
+        );
+
+        document.getElementById("signOut").addEventListener(
+            "click",
+            async () => {
+                await signOutRedirect();
+            }
+        );
+
+        const params =
+            new URLSearchParams(window.location.search);
+
+        let user;
+
+        if (params.has("code")) {
+            user = await userManager.signinCallback();
+
+            window.history.replaceState(
+                {},
+                document.title,
+                window.location.pathname
+            );
+        } else {
+            user = await userManager.getUser();
+        }
+
+        if (
+            user !== null &&
+            user.expired === false
+        ) {
+            document.getElementById("email").textContent =
+                user.profile?.email || "";
+
+            document.getElementById("email").classList.remove("hidden");
+            document.getElementById("signIn").classList.add("hidden");
+            document.getElementById("signOut").classList.remove("hidden");
+            document.getElementById("signedOutMessage").classList.add("hidden");
+            document.getElementById("appContent").classList.remove("hidden");
+            document.getElementById("openWorkoutButton").classList.remove("hidden");
+
+            await loadWeeklyGoal();
+            loadWorkouts();
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "fittrack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5500",
+    "build": "vite build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "oidc-client-ts": "^3.5.0"
+  },
+  "devDependencies": {
+    "vite": "^8.2.2"
+  }
+}
