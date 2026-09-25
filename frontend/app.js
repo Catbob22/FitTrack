@@ -239,7 +239,7 @@ function createDemoWorkouts() {
             exercise: "Bench Press",
             sets: 3,
             reps: 8,
-            weight: 70,
+            weight: 25,
             duration: 0,
             distance: 0,
             notes: "Felt strong today"
@@ -251,7 +251,7 @@ function createDemoWorkouts() {
             exercise: "Shoulder Press",
             sets: 3,
             reps: 10,
-            weight: 22.5,
+            weight: 10,
             duration: 0,
             distance: 0,
             notes: "Controlled reps"
@@ -260,10 +260,10 @@ function createDemoWorkouts() {
             entryId: "demo-3",
             date: dateForOffset(2),
             workoutType: "Pull",
-            exercise: "Lat Pulldown",
-            sets: 4,
+            exercise: "Bicep Curl",
+            sets: 3,
             reps: 10,
-            weight: 50,
+            weight: 8,
             duration: 0,
             distance: 0,
             notes: "Focused on full range of motion"
@@ -275,7 +275,7 @@ function createDemoWorkouts() {
             exercise: "Barbell Squat",
             sets: 4,
             reps: 6,
-            weight: 85,
+            weight: 70,
             duration: 0,
             distance: 0,
             notes: "Added 5 kg from last week"
@@ -299,7 +299,7 @@ function createDemoWorkouts() {
             exercise: "Bench Press",
             sets: 3,
             reps: 8,
-            weight: 65,
+            weight: 22.5,
             duration: 0,
             distance: 0,
             notes: "Previous week"
