@@ -97,6 +97,7 @@ DynamoDB
 
 
 ## Project Structure
+```
 FitTrack/
 |-- frontend/
 │   |-- index.html
@@ -113,6 +114,7 @@ FitTrack/
 |-- screenshots/
 |-- .gitignore
 |-- README.md
+```
 
 ## Security
 Some security measures implemented in FitTrack include:
