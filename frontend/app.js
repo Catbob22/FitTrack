@@ -155,6 +155,7 @@ const sessionContent = document.getElementById("sessionContent");
 
 /* Toast notification at the top right */
 const toast = document.getElementById("toast");
+const tryDemoButton = document.getElementById("tryDemoButton");
 
 
 /* =========================================
@@ -168,8 +169,143 @@ let workouts = [];
 let editingEntryId = null;
 let deletingEntryId = null;
 let weeklyGoal = null;
+let demoMode = false;
 
 let summaryReferenceDate = new Date();
+
+window.fitTrackDemoMode = false;
+
+
+tryDemoButton.addEventListener("click", startDemoMode);
+
+
+function startDemoMode() {
+    demoMode = true;
+    window.fitTrackDemoMode = true;
+
+    workouts = createDemoWorkouts();
+    weeklyGoal = 4;
+    summaryReferenceDate = new Date();
+
+    const email = document.getElementById("email");
+    const signIn = document.getElementById("signIn");
+    const signOut = document.getElementById("signOut");
+    const signedOutMessage = document.getElementById("signedOutMessage");
+    const appContent = document.getElementById("appContent");
+
+    email.textContent = "Demo mode";
+    email.classList.remove("hidden");
+    signIn.classList.add("hidden");
+    signOut.textContent = "Exit Demo";
+    signOut.classList.remove("hidden");
+    signedOutMessage.classList.add("hidden");
+    appContent.classList.remove("hidden");
+    openWorkoutButton.classList.remove("hidden");
+
+    showWeeklySummaryView();
+    renderWeeklySummary();
+    filterWorkouts();
+
+    showToast("Demo mode started. Changes reset when you leave.");
+}
+
+
+function createDemoWorkouts() {
+    const currentWeek = getWeekRange(new Date());
+    const today = new Date();
+    const todayOffset =
+        today.getDay() === 0
+            ? 6
+            : today.getDay() - 1;
+
+    function dateForOffset(offset) {
+        const date = new Date(currentWeek.monday);
+
+        date.setDate(
+            currentWeek.monday.getDate() + Math.min(offset, todayOffset)
+        );
+
+        return getDateKey(date);
+    }
+
+    const previousWeekDate = new Date(currentWeek.monday);
+    previousWeekDate.setDate(previousWeekDate.getDate() - 5);
+
+    return [
+        {
+            entryId: "demo-1",
+            date: dateForOffset(0),
+            workoutType: "Push",
+            exercise: "Bench Press",
+            sets: 3,
+            reps: 8,
+            weight: 70,
+            duration: 0,
+            distance: 0,
+            notes: "Felt strong today"
+        },
+        {
+            entryId: "demo-2",
+            date: dateForOffset(0),
+            workoutType: "Push",
+            exercise: "Shoulder Press",
+            sets: 3,
+            reps: 10,
+            weight: 22.5,
+            duration: 0,
+            distance: 0,
+            notes: "Controlled reps"
+        },
+        {
+            entryId: "demo-3",
+            date: dateForOffset(2),
+            workoutType: "Pull",
+            exercise: "Lat Pulldown",
+            sets: 4,
+            reps: 10,
+            weight: 50,
+            duration: 0,
+            distance: 0,
+            notes: "Focused on full range of motion"
+        },
+        {
+            entryId: "demo-4",
+            date: dateForOffset(4),
+            workoutType: "Legs",
+            exercise: "Barbell Squat",
+            sets: 4,
+            reps: 6,
+            weight: 85,
+            duration: 0,
+            distance: 0,
+            notes: "Added 5 kg from last week"
+        },
+        {
+            entryId: "demo-5",
+            date: dateForOffset(todayOffset),
+            workoutType: "Cardio",
+            exercise: "Outdoor Run",
+            sets: 0,
+            reps: 0,
+            weight: 0,
+            duration: 30,
+            distance: 5,
+            notes: "Comfortable pace"
+        },
+        {
+            entryId: "demo-6",
+            date: getDateKey(previousWeekDate),
+            workoutType: "Push",
+            exercise: "Bench Press",
+            sets: 3,
+            reps: 8,
+            weight: 65,
+            duration: 0,
+            distance: 0,
+            notes: "Previous week"
+        }
+    ];
+}
 
 
 /* =========================================
@@ -390,6 +526,12 @@ function getEditFormWorkout() {
 ========================================= */
 
 async function loadWorkouts() {
+    if (demoMode) {
+        renderWeeklySummary();
+        filterWorkouts();
+        return;
+    }
+
     try {
         const user = await window.userManager.getUser();
 
@@ -427,6 +569,12 @@ async function loadWorkouts() {
 
 
 async function loadWeeklyGoal() {
+    if (demoMode) {
+        weeklyGoal = 4;
+        renderWeeklySummary();
+        return;
+    }
+
     try {
         const user = await window.userManager.getUser();
 
@@ -470,22 +618,27 @@ workoutForm.addEventListener(
             submitButton.disabled = true;
             submitButton.textContent = "Logging...";
 
-            const user = await window.userManager.getUser();
+            if (demoMode) {
+                newWorkout.entryId = "demo-" + Date.now();
+                workouts.push(newWorkout);
+            } else {
+                const user = await window.userManager.getUser();
 
-            const response = await fetch(
-                API_URL,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${user.access_token}`
-                    },
-                    body: JSON.stringify(newWorkout)
+                const response = await fetch(
+                    API_URL,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${user.access_token}`
+                        },
+                        body: JSON.stringify(newWorkout)
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Failed to save workout");
                 }
-            );
-
-            if (!response.ok) {
-                throw new Error("Failed to save workout");
             }
 
             workoutForm.reset();
@@ -682,22 +835,37 @@ editForm.addEventListener(
             updateButton.disabled = true;
             updateButton.textContent = "Updating...";
 
-            const user = await window.userManager.getUser();
+            if (demoMode) {
+                const workoutIndex = workouts.findIndex(
+                    workout => workout.entryId === editingEntryId
+                );
 
-            const response = await fetch(
-                API_URL + "/" + editingEntryId,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${user.access_token}`
-                    },
-                    body: JSON.stringify(updatedWorkout)
+                if (workoutIndex === -1) {
+                    throw new Error("Workout could not be found");
                 }
-            );
 
-            if (!response.ok) {
-                throw new Error("Failed to update workout");
+                workouts[workoutIndex] = {
+                    ...workouts[workoutIndex],
+                    ...updatedWorkout
+                };
+            } else {
+                const user = await window.userManager.getUser();
+
+                const response = await fetch(
+                    API_URL + "/" + editingEntryId,
+                    {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${user.access_token}`
+                        },
+                        body: JSON.stringify(updatedWorkout)
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Failed to update workout");
+                }
             }
 
             closeEditModal();
@@ -771,20 +939,26 @@ async function confirmDeleteWorkout() {
         confirmDeleteButton.disabled = true;
         confirmDeleteButton.textContent = "Deleting...";
 
-        const user = await window.userManager.getUser();
+        if (demoMode) {
+            workouts = workouts.filter(
+                workout => workout.entryId !== deletingEntryId
+            );
+        } else {
+            const user = await window.userManager.getUser();
 
-        const response = await fetch(
-            API_URL + "/" + deletingEntryId,
-            {
-                method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${user.access_token}`
+            const response = await fetch(
+                API_URL + "/" + deletingEntryId,
+                {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": `Bearer ${user.access_token}`
+                    }
                 }
-            }
-        );
+            );
 
-        if (!response.ok) {
-            throw new Error("Failed to delete workout");
+            if (!response.ok) {
+                throw new Error("Failed to delete workout");
+            }
         }
 
         closeDeleteModal();
@@ -1046,29 +1220,37 @@ async function saveWeeklyGoal(event) {
         saveWeeklyGoalButton.disabled = true;
         saveWeeklyGoalButton.textContent = "Saving...";
 
-        const user = await window.userManager.getUser();
+        let savedGoal;
 
-        const response = await fetch(
-            API_URL.replace("/entries", "/settings"),
-            {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${user.access_token}`
-                },
-                body: JSON.stringify({
-                    weeklyGoal: Number(weeklyGoalInput.value)
-                })
+        if (demoMode) {
+            savedGoal = Number(weeklyGoalInput.value);
+        } else {
+            const user = await window.userManager.getUser();
+
+            const response = await fetch(
+                API_URL.replace("/entries", "/settings"),
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${user.access_token}`
+                    },
+                    body: JSON.stringify({
+                        weeklyGoal: Number(weeklyGoalInput.value)
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to save weekly goal");
             }
-        );
 
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || "Failed to save weekly goal");
+            savedGoal = data.weeklyGoal;
         }
 
-        weeklyGoal = data.weeklyGoal;
+        weeklyGoal = savedGoal;
         closeWeeklyGoalModal();
         renderWeeklySummary();
 

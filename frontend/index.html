@@ -48,6 +48,20 @@
         <div id="signedOutMessage" class="signed-out-message">
             <h2>Welcome to FitTrack</h2>
             <p>Sign in to track your training and view your progress.</p>
+
+            <div class="signed-out-actions">
+                <button
+                    type="button"
+                    id="tryDemoButton"
+                    class="demo-button"
+                >
+                    Try Demo
+                </button>
+
+                <small>
+                    Explore FitTrack with sample data. Demo changes are temporary.
+                </small>
+            </div>
         </div>
 
 
@@ -706,6 +720,11 @@
         document.getElementById("signOut").addEventListener(
             "click",
             async () => {
+                if (window.fitTrackDemoMode === true) {
+                    window.location.reload();
+                    return;
+                }
+
                 await signOutRedirect();
             }
         );
@@ -728,6 +747,7 @@
         }
 
         if (
+            window.fitTrackDemoMode !== true &&
             user !== null &&
             user.expired === false
         ) {
